@@ -1,0 +1,8 @@
+E:\Programing\c#\DapperStudy\DapperStudy\bin\Debug\DapperStudy.exe.config
+E:\Programing\c#\DapperStudy\DapperStudy\bin\Debug\DapperStudy.exe
+E:\Programing\c#\DapperStudy\DapperStudy\bin\Debug\DapperStudy.pdb
+E:\Programing\c#\DapperStudy\DapperStudy\bin\Debug\Dapper.dll
+E:\Programing\c#\DapperStudy\DapperStudy\bin\Debug\Dapper.xml
+E:\Programing\c#\DapperStudy\DapperStudy\obj\Debug\DapperStudy.csprojResolveAssemblyReference.cache
+E:\Programing\c#\DapperStudy\DapperStudy\obj\Debug\DapperStudy.exe
+E:\Programing\c#\DapperStudy\DapperStudy\obj\Debug\DapperStudy.pdb

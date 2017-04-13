@@ -1,0 +1,10 @@
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\bin\Debug\DapperStudyUnitTest.dll
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\bin\Debug\DapperStudyUnitTest.pdb
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\bin\Debug\DapperStudy.exe
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\bin\Debug\Dapper.dll
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\bin\Debug\DapperStudy.pdb
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\bin\Debug\Dapper.xml
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\obj\Debug\DapperStudyUnitTest.csprojResolveAssemblyReference.cache
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\obj\Debug\DapperStudyUnitTest.dll
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\obj\Debug\DapperStudyUnitTest.pdb
+E:\Programing\c#\DapperStudy\DapperStudyUnitTest\bin\Debug\DapperStudyUnitTest.dll.config
