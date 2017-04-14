@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
+using DapperExtensions;
 using System.Data;
 namespace DapperStudy.Utils
 {
@@ -15,6 +16,7 @@ namespace DapperStudy.Utils
     /// </summary>
     public class DapperUtil
     {
+        #region 获取连接
         /// <summary>
         /// 获取已开启的数据库链接
         /// </summary>
@@ -25,6 +27,8 @@ namespace DapperStudy.Utils
             connection.Open();
             return connection;
         }
+        #endregion
+        #region 原生查询
         /// <summary>
         /// 泛型查询多个对象
         /// </summary>
@@ -100,7 +104,9 @@ namespace DapperStudy.Utils
                 return results;
             }
         }
-       /// <summary>
+        #endregion
+        #region 通用
+        /// <summary>
        /// 执行sql语句
        /// 返回受影响的行数
        /// </summary>
@@ -115,7 +121,7 @@ namespace DapperStudy.Utils
             }
         }
         /// <summary>
-        /// 多段sql执行存储过程
+        /// 多段sql执行事务
         /// </summary>
         /// <param name="sqls"></param>
         /// <param name="paramsObject"></param>
@@ -141,6 +147,8 @@ namespace DapperStudy.Utils
                 return flag;
             }
         }
+        #endregion
+        #region 原生Dapper的插入或者修改
         /// <summary>
         /// 执行一个对象的插入或者修改操作
         /// 返回主键
@@ -169,30 +177,227 @@ namespace DapperStudy.Utils
             }
         }
         /// <summary>
-        /// 执行多个对象的插入或者修改
+        /// 执行多个对象的插入或者修改 使用了事务
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sql"></param>
         /// <param name="enity"></param>
-        public static void ExecuteUpdateOrInsert<T>(string sql, IEnumerable<T> enity)
+        public static bool ExecuteUpdateOrInsert<T>(string sql, IEnumerable<T> enitys)
+        {
+            using (var connection = OpenConnection())
+            using(var tran=connection.BeginTransaction())
+            {
+                bool flag = true;
+                try
+                {
+                    connection.Execute(sql, enitys);
+                }
+                catch (Exception e)
+                {
+                    flag = false;
+                    tran.Rollback();
+                }
+                return flag;
+            }
+        }
+       /// <summary>
+        /// 执行多个对象的插入或者修改 使用了事务
+       /// </summary>
+       /// <param name="sql"></param>
+       /// <param name="enitys"></param>
+       /// <returns></returns>
+        public static bool ExecuteUpdateOrInsert(string sql, IEnumerable<object> enitys)
+        {
+            using (var connection = OpenConnection())
+            using(var tran=connection.BeginTransaction())
+            {
+                bool flag = true;
+                try
+                {
+                    connection.Execute(sql, enitys);
+                }
+                catch (Exception e)
+                {
+                    flag = false;
+                    tran.Rollback();
+                }
+                return flag;
+            }
+        }
+        #endregion
+        #region 扩展查询
+        /// <summary>
+        /// 查询所有
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEnumerable<T> QueryAllByExtension<T>() where T:class
         {
             using (var connection = OpenConnection())
             {
-                connection.Execute(sql, enity);
+               return connection.GetList<T>();
             }
         }
         /// <summary>
-        /// 执行多个对象的插入或者修改
+        /// 通过谓词查询
         /// </summary>
-        /// <param name="sql"></param>
-        /// <param name="enity"></param>
-        public static void ExecuteUpdateOrInsert(string sql, IEnumerable<object> enity)
+        /// <typeparam name="T"></typeparam>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> QueryByExtension<T>(object predicate) where T : class
         {
             using (var connection = OpenConnection())
             {
-                connection.Execute(sql, enity);
+                return connection.GetList<T>();
             }
         }
+        /// <summary>
+        /// 通过ID查询
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static T QueryByIdExtension<T>(long id) where T : class
+        {
+            using (var connection = OpenConnection())
+            {
+                return connection.Get<T>(id);
+            }
+        }
+        #endregion
+        #region 扩展插入
+       /// <summary>
+       /// 插入单个对象 返回主键
+       /// </summary>
+       /// <typeparam name="T"></typeparam>
+       /// <param name="entity"></param>
+       /// <returns></returns>
+        public static dynamic SaveByExtension<T>(T entity) where T : class
+        {
+            using (var connection = OpenConnection())
+            {
+                return connection.Insert(entity);
+            }
+        }
+        /// <summary>
+        /// 批量查入对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entitys"></param>
+        /// <returns></returns>
+        public static bool SaveByExtension<T>(IEnumerable<T> entitys) where T : class
+        {
+            using (var connection = OpenConnection())
+            using(var tran=connection.BeginTransaction())
+            {
+                try
+                {
+                    connection.Insert(entitys, tran);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+            }
+        }
+        #endregion
+        #region 扩展修改
+        /// <summary>
+        /// Update单个对象 返回主键
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static dynamic UpdateByExtension<T>(T entity) where T : class
+        {
+            using (var connection = OpenConnection())
+            {
+                return connection.Update(entity);
+            }
+        }
+        /// <summary>
+        /// 批量Update对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entitys"></param>
+        /// <returns></returns>
+        public static bool UpdateByExtension<T>(IEnumerable<T> entitys) where T : class
+        {
+            using (var connection = OpenConnection())
+            using (var tran = connection.BeginTransaction())
+            {
+                try
+                {
+                    connection.Update(entitys, tran);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+            }
+        }
+        #endregion
+        #region 扩展删除
+        /// <summary>
+        /// 根据对象来删除对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity"></param>
+        public static void DeleteEntity<T>(T entity) where T:class
+        {
+            using (var connection = OpenConnection())
+            {
+                connection.Delete<T>(entity);
+            }
+        }
+
+        /// <summary>
+        /// 根据对象ID删除对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        public static void DeleteEntity<T>(long id) where T : class
+        {
+            using (var connection = OpenConnection())
+            {
+                connection.Delete<T>(id);
+            }
+        }
+        /// <summary>
+        /// 根据对象集合批量删除对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity"></param>
+        public static void DeleteEntity<T>(IEnumerable<T> entitys) where T : class
+        {
+            using (var connection = OpenConnection())
+            {
+                foreach (var entity in entitys)
+                {
+                    connection.Delete<T>(entity);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 根据对象ID集合批量删除对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        public static void DeleteEntity<T>(IEnumerable<int> ids) where T : class
+        {
+            using (var connection = OpenConnection())
+            {
+                foreach(var id in ids)
+                {
+                    connection.Delete<T>(id);
+                }
+            }
+        }
+        #endregion
+        #region 私有辅助方法
         /// <summary>
         /// 多段sql语句拼接为一句sql
         /// </summary>
@@ -215,5 +420,6 @@ namespace DapperStudy.Utils
             }
             return sql;
         }
+        #endregion
     }
 }
