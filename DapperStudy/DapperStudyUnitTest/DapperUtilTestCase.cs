@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data;
 using DapperStudy.Utils;
 using DapperStudy;
-
+using System.Linq;
 namespace DapperStudyUnitTest
 {
     [TestClass]
